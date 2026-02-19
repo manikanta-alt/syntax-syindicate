@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🚀 VidyaGuide AI - Career Agent (Hackathon Finalist)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; padding: 20px; 
+    }
+    .container { max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+    .header { background: linear-gradient(90deg, #4f46e5, #7c3aed); color: white; padding: 30px; text-align: center; }
+    .header h1 { font-size: 2.2em; margin-bottom: 10px; }
+    .stats { display: flex; justify-content: space-around; margin-top: 15px; }
+    .stat { text-align: center; }
+    .stat-number { font-size: 1.8em; font-weight: bold; color: #10b981; }
+    
+    #chat { height: 500px; overflow-y: auto; padding: 20px; background: #f8fafc; }
+    .message { margin: 15px 0; animation: fadeIn 0.3s ease; }
+    .user { text-align: right; }
+    .user .bubble { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+    .agent .bubble { background: white; border: 2px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .bubble { display: inline-block; padding: 15px 20px; border-radius: 20px; max-width: 70%; word-wrap: break-word; }
+    
+    .input-area { padding: 20px; background: #f1f5f9; display: flex; gap: 10px; }
+    #userInput { flex: 1; padding: 15px 20px; border: 2px solid #e2e8f0; border-radius: 25px; font-size: 16px; outline: none; transition: border-color 0.3s; }
+    #userInput:focus { border-color: #3b82f6; }
+    button { padding: 15px 25px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+    button:hover { transform: scale(1.05); }
+    
+    .quick-buttons { padding: 0 20px 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .quick-btn { padding: 10px 20px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+    .quick-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+    
+    .resume-preview { background: #1e293b; color: white; padding: 20px; border-radius: 10px; margin: 10px 20px; white-space: pre-wrap; font-family: 'Courier New', monospace; display: none; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 600px) { .container { margin: 10px; } .header h1 { font-size: 1.8em; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 VidyaGuide AI Agent</h1>
+      <p>Career Planning & Resume Mentor for Indian CS Students</p>
+      <div class="stats">
+        <div class="stat"><div class="stat-number">10M+</div>CS Students</div>
+        <div class="stat"><div class="stat-number">₹8-15L</div>Avg SWE Salary</div>
+        <div class="stat"><div class="stat-number">70%</div>Tier-2 Grads</div>
+      </div>
+    </div>
+    
+    <div id="chat"></div>
+    
+    <div class="quick-buttons" id="quickButtons"></div>
+    
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Tell me about your skills, education, or say 'generate resume'..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+    
+    <div class="resume-preview" id="resumePreview">
+      <strong>📄 YOUR GENERATED RESUME</strong>
+      <div id="resumeContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const userInput = document.getElementById('userInput');
+    const quickButtons = document.getElementById('quickButtons');
+    const resumePreview = document.getElementById('resumePreview');
+    const resumeContent = document.getElementById('resumeContent');
+    
+    let profile = {
+      name: 'Mani Kanta',
+      location: 'Hyderabad',
+      skills: [],
+      education: [],
+      interests: [],
+      experience: []
+    };
+    
+    const jobs = {
+      'python': 'Python Developer (₹10-18LPA)',
+      'javascript': 'Frontend Engineer (₹8-15LPA)',
+      'ds': 'Data Structures → SDE Interviews',
+      'web': 'Full Stack Developer (₹12-20LPA)',
+      'startup': 'Product Engineer → Equity offers'
+    };
+    
+    function addMessage(text, isUser) {
+      const div = document.createElement('div');
+      div.className = `message ${isUser ? 'user' : 'agent'}`;
+      div.innerHTML = `<div class="bubble">${text}</div>`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    
+    function showQuickButtons(options) {
+      quickButtons.innerHTML = options.map(opt => 
+        `<div class="quick-btn" onclick="quickReply('${opt}')">${opt}</div>`
+      ).join('');
+    }
+    
+    function quickReply(text) {
+      userInput.value = text;
+      sendMessage();
+    }
+    
+    function generateResume() {
+      const skillsStr = profile.skills.join(', ');
+      const eduStr = profile.education.join('
+');
+      const resume = `# ${profile.name}
+Hyderabad, Telangana | CS Student | LinkedIn
+
+## 🎓 Education
+${eduStr || 'Anveshana Certification (Data Structures)'}
+
+## 💻 Skills
+${skillsStr || 'Python, DSA, Web Development'}
+
+## 🚀 Career Path
+${profile.interests.length ? profile.interests.join(', ') : 'Startups, Software Engineering'}
+
+## 🎯 Recommended Jobs
+${Object.keys(jobs).filter(skill => 
+  profile.skills.some(s => s.toLowerCase().includes(skill))
+).map(skill => jobs[skill]).join('
+') || jobs['python']}
+
+*Generated by VidyaGuide AI Agent - Hackathon 2026*`;
+      
+      resumeContent.textContent = resume;
+      resumePreview.style.display = 'block';
+      resumePreview.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function sendMessage() {
+      const msg = userInput.value.trim();
+      if (!msg) return;
+      
+      addMessage(msg, true);
+      userInput.value = '';
+      quickButtons.innerHTML = '';
+      
+      setTimeout(() => {
+        let response = "Got it! Tell me more about your skills or say 'generate resume'.";
+        
+        // Parse profile
+        if (msg.toLowerCase().includes('anveshana') || msg.includes('cert')) {
+          profile.education.push('Anveshana Certification - Data Structures & Algorithms');
+          response = "✅ Anveshana cert noted! Great for SDE interviews. What skills?";
+        }
+        if (msg.toLowerCase().includes('python') || msg.includes('js')) {
+          profile.skills.push(msg.match(/python|javascript|js|web/gi)?.[0] || 'Python');
+          response = `🎉 ${jobs['python']} fits you! Add more skills?`;
+        }
+        if (msg.toLowerCase().includes('startup')) {
+          profile.interests.push('Startups');
+          response = "🚀 Perfect! Hyderabad startup scene is booming. Want equity-focused resume?";
+        }
+        if (msg.toLowerCase().includes('generate') || msg.includes('resume')) {
+          response = "📄 Generating your India-specific resume...";
+          setTimeout(generateResume, 1000);
+          return;
+        }
+        
+        addMessage(response, false);
+        showQuickButtons([
+          'I know Python/DSA', 
+          'Anveshana Certification', 
+          'Startup interest', 
+          'Generate resume',
+          'Job suggestions'
+        ]);
+      }, 800);
+    }
+    
+    // Start conversation
+    addMessage("Hi Mani Kanta! 👋 I'm VidyaGuide, your career agent for Indian CS students. <br>Share your skills/education or click quick replies!", false);
+    showQuickButtons(['CS Student Hyderabad', 'Anveshana Certification', 'Python/DSA skills', 'Startup career']);
+    
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
